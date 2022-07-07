@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>My profile</h2>
+
+<div style="padding-left: 80;">
+        <h4 style="color:red">Bought shoes:<h4>
+                        <table style="margin-left:auto;margin-right:auto;">
+                                <thead>
+                                        <tr>
+                                                <th></th>
+                                                <th>Name</th>
+                                                <th>Price</th>
+                                                <th>Expiry</th>
+                                                <th></th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        {% for article in articles %}
+                                        <tr>
+                                                <div class="details">
+                                                        <td>
+                                                                <div class="square" style="height: 350px;width: 350px;">
+                                                                        <img src={{article.image_url}} alt="Shoes"
+                                                                                style="vertical-align:middle;margin:0px 0px;height: 100%; width: 100%; object-fit: contain">
+                                                                </div>
+                                                        </td>
+                                                        <div style="display: none"><input type="text" id="pk" name="pk"
+                                                                        value={{article.pk}}></div>
+                                                        <td>{{article.name}}</td>
+                                                        <td>{{article.final_price}} €</td>
+                                                        <td><label>{{article.expiry}}</label></td>
+                                                </div>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                        </table>
+
+</div>
+
+{% endblock %}

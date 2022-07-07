@@ -1,0 +1,59 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+{% if message %}
+<div class="alertgray">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    {{message}}
+</div>
+{% endif %}
+<br>
+<br>
+{% if articles.count > 0 %}
+
+<table style="margin-left:auto;margin-right:auto;">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Last offer</th>
+            <th>Expiry</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for article in articles %}
+        <tr>
+            <div class="details">
+                <form method="GET" action="do_offer/" {{article.pk}}>
+                    <td>
+                        <div class="square" style="height: 350px;width: 350px;">
+                            <img src={{article.image_url}} alt="Shoes"
+                                style="vertical-align:middle;margin:0px 0px;height: 100%; width: 100%; object-fit: contain">
+                        </div>
+                    </td>
+                    <div style="display: none"><input type="text" id="pk" name="pk" value={{article.pk}}></div>
+                    <td>{{article.name}}</td>
+                    <td>{{article.final_price}} €</td>
+                    <td><label>{{article.expiry}}</label></td>
+                    <td><input type="number" name="offer" placeholder=0></td>
+                    <td><button style="background:green;color:white;border-width:0;width: 100%; ">DO OFFER</button></td>
+                </form>
+            </div>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+there are no offers available at the moment
+{% endif %}
+
+{% else %}
+<p>Welcome</p>
+{% endif %}
+
+{% endblock %}
