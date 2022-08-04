@@ -3,3 +3,5 @@ sqlparse==0.2.4
 requests==2.27.1
 web3==5.29.0
 django-redis==5.2.0
+celery==5.2.7
+redis==4.3.1

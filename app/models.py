@@ -36,7 +36,7 @@ class Article(models.Model):
     available = models.BooleanField(default=True)
     final_price = models.FloatField(default=0)
     expiry = models.DateTimeField(
-        default=(datetime.datetime.now() + datetime.timedelta(days=30)).replace(
+        default=(datetime.datetime.now() + datetime.timedelta(seconds=100)).replace(
             tzinfo=pytz.UTC
         )
     )

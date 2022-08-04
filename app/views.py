@@ -14,10 +14,7 @@ import hashlib
 from web3 import Web3
 from django.forms.models import model_to_dict
 
-
 message = ""
-do_it_one_time = True
-do_it_one_time2 = True
 
 
 def home_view(request):
@@ -32,24 +29,12 @@ def home_view(request):
         if cache.get(a.pk):
             last_offer_data = cache.get(a.pk)
             a.final_price = last_offer_data[1]
-
-    global do_it_one_time
-
-    if do_it_one_time:
-        # run a task that check continuosly if some auction is ended, so it can assign the Article
-        # send an eventually email or message to the user
-        # and save the date to the blockchain
-        try:
-            prof = request.user.profile
-            t = threading.Thread(
-                target=check_auction_end,
-                args=(articles, prof, request),
-                daemon=True,
+        else:
+            data_to_store = [None, 0, a]
+            cache.set(
+                a.pk,
+                data_to_store,
             )
-            t.start()
-            do_it_one_time = False
-        except:
-            print("--------------ERROR------------")
 
     global message
     local_mess = message
@@ -90,77 +75,32 @@ def do_new_offer(request):
             global message
             print(cache)
             if cache.get(pk):
-                last_offer_data = cache.get(pk)
-                if last_offer_data[0] == request.user.profile:
+                cached_element = cache.get(pk)
+                cached_profile = cached_element[0]
+                cached_offer = cached_element[1]
+                cached_article = cached_element[2]
+                if cached_profile == request.user.profile:
                     message = "You are already the highest bidder"
                     return HttpResponseRedirect("/")
                 else:
-                    if offer_value > last_offer_data[1]:
+                    if int(offer_value) > cached_offer:
                         # its a good offer
                         message = "offer executed correctly"
-                        data_to_store = [request.user.profile, offer_value]
+                        data_to_store = [
+                            request.user.profile,
+                            offer_value,
+                            cached_article,
+                        ]
                         cache.set(
                             pk,
                             data_to_store,
                         )
                     else:
                         message = "Too low offer"
-            else:
-                # no cache for this item on redis
-                # new offer sended correctly
-                message = "first offer executed correctly"
-                data_to_store = [request.user.profile, offer_value]
-                cache.set(
-                    pk,
-                    data_to_store,
-                )
+
         return HttpResponseRedirect("/")
     else:
         return HttpResponseRedirect("/")
-
-
-def check_auction_end(articles, profile, request):
-    global message
-    stop_while = False
-    while True:
-        utc = pytz.UTC
-        global do_it_one_time
-        for article in articles:
-            f1 = article.expiry
-            f2 = datetime.datetime.now().replace(tzinfo=utc)
-            if f1 < f2:
-                # ended auction
-                article.available = False
-                if cache.get(article.pk):
-                    last_offer_data = cache.get(article.pk)
-                    # il prezzo finale è l'ultima offerta
-                    article.final_price = last_offer_data[1]
-                    article.user = profile
-                    # save the winner
-                    print(article.name)
-                    save_last_offer = Offer(
-                        referring_user=profile,
-                        referring_article=article,
-                        price=last_offer_data[1],
-                        datetime=datetime.datetime.now(),
-                    )
-                    save_last_offer.save()
-                    article.save()
-
-                    # winned auction
-                    message = "Good job!! U winned an auction. Go to your profile to see details"
-                    # do a transaction on blockchain
-                    send_data_to_blockchain(profile, article, save_last_offer)
-                stop_while = True
-        if stop_while:
-            break
-        time.sleep(6)
-
-    # refresh home
-    global do_it_one_time
-    do_it_one_time = True
-
-    return home_view(request)
 
 
 def send_data_to_blockchain(profile, article, save_last_offer):

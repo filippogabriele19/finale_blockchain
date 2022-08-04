@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app",
+    "django_crontab",
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+
+CRONJOBS = [("*/240 * * * *", "app.cron.my_scheduled_job")]
